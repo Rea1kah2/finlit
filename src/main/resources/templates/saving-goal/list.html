@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Target Tabungan — FinLit</title>
+  <link rel="stylesheet" th:href="@{/css/finlit.css}">
+  <link rel="icon" type="image/png" th:href="@{/favicon.jpg}">
+</head>
+<body>
+<div th:replace="~{fragments/navbar :: navbar}"></div>
+
+<div class="hero" style="padding:2rem 0 1.5rem;">
+  <div class="container">
+    <div class="overline-gold mb-1">Tabungan</div>
+    <div class="flex-between">
+      <div>
+        <h2 style="color:var(--text-on-dark);">Target Tabungan</h2>
+        <p>Rencanakan dan pantau tujuan keuanganmu dengan strategi yang terukur.</p>
+      </div>
+      <a th:href="@{/saving-goals/add}" class="btn btn-gold">Tambah Target</a>
+    </div>
+  </div>
+</div>
+
+<div class="container page-content">
+
+  <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+
+  <div th:if="${goals.empty}" class="card">
+    <div class="card-body">
+      <div class="empty-state">
+        <p>Belum ada target tabungan. Mulai tetapkan tujuan keuanganmu.</p>
+        <a th:href="@{/saving-goals/add}" class="btn btn-primary btn-sm">
+          Buat target pertama
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid-2">
+    <div th:each="goal : ${goals}" class="card">
+
+      <!-- Header card gelap -->
+      <div style="padding:1rem 1.5rem; background:var(--dark-2);
+                  border-bottom:1px solid var(--border-dark);">
+        <div class="flex-between">
+          <h4 style="color:var(--text-on-dark); font-size:1rem;"
+              th:text="${goal.name}"></h4>
+          <span th:if="${goal.achieved}" class="badge badge-income">Tercapai</span>
+        </div>
+        <div style="color:var(--text-on-dark-sub); font-size:0.8125rem; margin-top:0.25rem;"
+             th:text="'Batas waktu: ' + ${goal.deadline}"></div>
+      </div>
+
+      <div class="card-body">
+
+        <!-- Progress -->
+        <div class="flex-between text-sm mb-1">
+          <span class="text-muted">Terkumpul</span>
+          <span class="font-bold"
+                th:text="'Rp ' + ${#numbers.formatDecimal(goal.currentAmount,1,'COMMA',0,'POINT')}"></span>
+        </div>
+        <div class="flex-between text-sm mb-2">
+          <span class="text-muted">Target</span>
+          <span class="font-bold"
+                th:text="'Rp ' + ${#numbers.formatDecimal(goal.targetAmount,1,'COMMA',0,'POINT')}"></span>
+        </div>
+        <div class="progress-wrap mb-1">
+          <div class="progress-bar" th:style="'width:' + ${goal.progressPercent()} + '%'"></div>
+        </div>
+        <div class="text-xs text-muted mb-3"
+             th:text="${goal.progressPercent()} + '% dari target tercapai'"></div>
+
+        <div class="divider"></div>
+
+        <!-- Rekomendasi setoran -->
+        <div class="section-title" style="margin-bottom:0.75rem;">
+          Rekomendasi setoran per bulan
+        </div>
+        <div th:with="s=${setoranMap[goal.id]}">
+          <div class="flex-between text-sm mb-1">
+            <span class="text-muted">Setoran tetap</span>
+            <span class="font-bold"
+                  th:text="'Rp ' + ${#numbers.formatDecimal(s['fixed'],1,'COMMA',0,'POINT')}"></span>
+          </div>
+          <div class="flex-between text-sm mb-1">
+            <span class="text-muted">20% dari pemasukan</span>
+            <span class="font-bold"
+                  th:text="'Rp ' + ${#numbers.formatDecimal(s['percentage'],1,'COMMA',0,'POINT')}"></span>
+          </div>
+          <div class="flex-between text-sm mb-3">
+            <span class="text-muted">Bertahap (+10%/bln)</span>
+            <span class="font-bold"
+                  th:text="'Rp ' + ${#numbers.formatDecimal(s['accelerated'],1,'COMMA',0,'POINT')}"></span>
+          </div>
+        </div>
+
+        <!-- Tombol Aksi -->
+        <div class="flex gap-1">
+          <!-- Perbarui tabungan: buka modal update -->
+          <button type="button" class="btn btn-sage btn-sm" style="flex:1;"
+                  th:attr="data-id=${goal.id},
+                           data-name=${goal.name},
+                           data-amount=${goal.currentAmount},
+                           data-target=${goal.targetAmount}"
+                  onclick="openUpdateModal(this)">
+            Perbarui Tabungan
+          </button>
+          <!-- Hapus: buka modal delete -->
+          <form th:id="'del-goal-' + ${goal.id}"
+                th:action="@{/saving-goals/delete/{id}(id=${goal.id})}" method="post">
+            <button type="button" class="btn btn-danger btn-sm"
+                    th:attr="data-id=${goal.id}, data-name=${goal.name}"
+                    onclick="openGoalDeleteModal(this)">
+              Hapus
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ─── Modal: Perbarui Jumlah Tabungan ─── -->
+<div id="updateModal" class="modal-overlay" onclick="handleOverlayClick(event,'updateModal')">
+  <div class="modal-box modal-neutral" style="max-width:26rem;">
+    <div class="modal-header">
+      <h4>Perbarui Jumlah Tabungan</h4>
+      <div class="modal-subtitle" id="updateGoalName">—</div>
+    </div>
+    <div class="modal-body" style="padding-top:1rem; padding-bottom:0.75rem;">
+      <p>
+        Masukkan total tabungan yang sudah kamu kumpulkan hingga saat ini
+        untuk target ini.
+      </p>
+    </div>
+    <div style="padding:0 1.75rem 0.75rem;">
+      <form id="updateAmountForm" method="post">
+        <div class="form-group">
+          <label class="form-label">Jumlah Terkumpul Saat Ini (Rp)</label>
+          <input type="number" name="amount" id="updateAmountInput"
+                 class="form-control" placeholder="0" min="0" step="1000">
+        </div>
+        <div id="updateProgressPreview"
+             style="padding:0.75rem 1rem; background:var(--bg-warm);
+                    border-radius:var(--radius-sm); font-size:0.8125rem;
+                    color:var(--text-muted); border:1px solid var(--border-light);">
+          Masukkan jumlah untuk melihat progres terbaru.
+        </div>
+      </form>
+    </div>
+    <div class="modal-footer" style="padding-top:1rem;">
+      <button type="button" class="btn btn-secondary"
+              onclick="closeModal('updateModal')">Batal</button>
+      <button type="submit" form="updateAmountForm"
+              style="flex:2; background:var(--dark); color:var(--text-on-dark);
+                     font-weight:700;"
+              class="btn">
+        Simpan Pembaruan
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ─── Modal: Konfirmasi Hapus Target ─── -->
+<div id="goalDeleteModal" class="modal-overlay"
+     onclick="handleOverlayClick(event,'goalDeleteModal')">
+  <div class="modal-box modal-danger">
+    <div class="modal-header">
+      <h4>Hapus target ini?</h4>
+      <div class="modal-subtitle" id="goalDeleteName">—</div>
+    </div>
+    <div class="modal-body" style="padding-top:1rem; padding-bottom:0.75rem;">
+      <p>
+        Semua data progress tabungan untuk target ini akan hilang
+        <strong>secara permanen</strong> dan tidak bisa dikembalikan.
+      </p>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-secondary"
+              onclick="closeModal('goalDeleteModal')">
+        Batal
+      </button>
+      <button type="button" id="confirmGoalDeleteBtn"
+              style="flex:1.5; background:#c0392b; color:white; border:none;
+                     font-weight:700; letter-spacing:0.01em;"
+              class="btn">
+        Ya, Hapus Target
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+  /* ── Utility ── */
+  function closeModal(id) {
+    document.getElementById(id).classList.remove('active');
+  }
+  function handleOverlayClick(e, id) {
+    if (e.target === e.currentTarget) closeModal(id);
+  }
+
+  /* ── Update Modal ── */
+  let goalTarget = 0;
+
+  function openUpdateModal(btn) {
+    const id     = btn.dataset.id;
+    const name   = btn.dataset.name;
+    const amount = parseFloat(btn.dataset.amount) || 0;
+    goalTarget   = parseFloat(btn.dataset.target) || 1;
+
+    document.getElementById('updateGoalName').textContent = name;
+    document.getElementById('updateAmountInput').value = Math.round(amount);
+    document.getElementById('updateAmountForm').action =
+      '/saving-goals/' + id + '/update-amount';
+
+    updateProgressPreview(amount);
+    document.getElementById('updateModal').classList.add('active');
+    setTimeout(function() {
+      document.getElementById('updateAmountInput').focus();
+    }, 220);
+  }
+
+  function updateProgressPreview(val) {
+    const pct = Math.min(100, Math.round((val / goalTarget) * 100));
+    const formatted = new Intl.NumberFormat('id-ID').format(val);
+    let msg;
+    if (pct >= 100) {
+      msg = 'Target sudah tercapai! Selamat!';
+    } else {
+      msg = pct + '% dari target tercapai  —  Rp ' + formatted + ' terkumpul';
+    }
+    document.getElementById('updateProgressPreview').textContent = msg;
+  }
+
+  document.getElementById('updateAmountInput').addEventListener('input', function() {
+    updateProgressPreview(parseFloat(this.value) || 0);
+  });
+
+  /* ── Delete Goal Modal ── */
+  let pendingGoalDeleteForm = null;
+
+  function openGoalDeleteModal(btn) {
+    pendingGoalDeleteForm =
+      document.getElementById('del-goal-' + btn.dataset.id);
+    document.getElementById('goalDeleteName').textContent =
+      '"' + btn.dataset.name + '"';
+    document.getElementById('goalDeleteModal').classList.add('active');
+  }
+
+  document.getElementById('confirmGoalDeleteBtn')
+    .addEventListener('click', function() {
+      if (pendingGoalDeleteForm) pendingGoalDeleteForm.submit();
+    });
+</script>
+
+  <div th:replace="~{fragments/footer :: footer}"></div>
+</body>
+</html>

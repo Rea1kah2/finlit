@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<th:block th:fragment="navbar">
+
+<nav class="navbar">
+  <div class="container">
+    <div class="navbar-inner">
+
+      <a th:href="@{/dashboard}" class="navbar-brand">Fin<span>Lit</span></a>
+
+      <!-- Desktop Nav (hidden on mobile) -->
+      <div class="navbar-nav">
+        <a th:href="@{/dashboard}"    class="nav-link">Beranda</a>
+        <a th:href="@{/transactions}" class="nav-link">Transaksi</a>
+        <a th:href="@{/saving-goals}" class="nav-link">Tabungan</a>
+        <a th:href="@{/reports}"      class="nav-link">Laporan</a>
+        <a th:href="@{/articles}"     class="nav-link">Artikel</a>
+        <a th:href="@{/quiz}"         class="nav-link">Kuis</a>
+        <span class="navbar-divider"></span>
+        <a th:href="@{/profile}" class="navbar-user"
+           th:text="${currentUser?.nama ?: 'Akun'}">Akun</a>
+        <a href="#" class="nav-logout"
+           onclick="openLogoutModal(); return false;">Keluar</a>
+      </div>
+
+      <!-- Mobile Hamburger (visible on mobile) -->
+      <button class="hamburger" id="hamburgerBtn"
+              onclick="toggleMobileMenu()" aria-label="Buka menu">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+
+    </div>
+  </div>
+
+  <!-- Mobile Dropdown Menu -->
+  <div class="mobile-menu" id="mobileMenu">
+    <a th:href="@{/dashboard}"    class="mobile-nav-item">Beranda</a>
+    <a th:href="@{/transactions}" class="mobile-nav-item">Transaksi</a>
+    <a th:href="@{/saving-goals}" class="mobile-nav-item">Tabungan</a>
+    <a th:href="@{/reports}"      class="mobile-nav-item">Laporan</a>
+    <a th:href="@{/articles}"     class="mobile-nav-item">Artikel</a>
+    <a th:href="@{/quiz}"         class="mobile-nav-item">Kuis</a>
+    <a th:href="@{/profile}" class="mobile-nav-item gold"
+       th:text="${currentUser?.nama ?: 'Akun'}">Akun</a>
+    <a href="#" class="mobile-nav-item danger"
+       onclick="openLogoutModal(); return false;">Keluar dari Akun</a>
+  </div>
+</nav>
+
+<!-- Modal: Konfirmasi Logout -->
+<div id="logoutModal" class="modal-overlay"
+     onclick="handleOverlayClick(event,'logoutModal')">
+  <div class="modal-box modal-neutral">
+    <div class="modal-header">
+      <h4>Keluar dari FinLit?</h4>
+      <div class="modal-subtitle">Sesi aktif kamu akan diakhiri</div>
+    </div>
+    <div class="modal-body" style="padding-top:1rem; padding-bottom:0.75rem;">
+      <p>
+        Kamu bisa masuk kembali kapan saja menggunakan email dan kata sandimu.
+        Data keuanganmu tetap aman tersimpan.
+      </p>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-secondary"
+              onclick="closeModal('logoutModal')">Tetap di Sini</button>
+      <a th:href="@{/auth/logout}"
+         class="btn"
+         style="flex:1.5; background:var(--dark); color:var(--text-on-dark);
+                font-weight:700; text-align:center;">
+        Ya, Keluar
+      </a>
+    </div>
+  </div>
+</div>
+
+<script>
+  /* ── Mobile Menu ── */
+  function toggleMobileMenu() {
+    document.getElementById('hamburgerBtn').classList.toggle('open');
+    document.getElementById('mobileMenu').classList.toggle('open');
+  }
+  document.querySelectorAll('.mobile-nav-item').forEach(function(link) {
+    link.addEventListener('click', function() {
+      document.getElementById('hamburgerBtn').classList.remove('open');
+      document.getElementById('mobileMenu').classList.remove('open');
+    });
+  });
+
+  /* ── Logout Modal ── */
+  function openLogoutModal() {
+    document.getElementById('logoutModal').classList.add('active');
+  }
+
+  /* ── Modal Utilities (shared, accessible by all pages) ── */
+  function closeModal(id) {
+    document.getElementById(id).classList.remove('active');
+  }
+  function handleOverlayClick(e, id) {
+    if (e.target === e.currentTarget) closeModal(id);
+  }
+
+  /* ── Scroll-Aware Transparent Navbar ── */
+  (function () {
+    var nav = document.querySelector('.navbar');
+    if (!nav) return;
+    function onScroll() {
+      if (window.scrollY > 40) {
+        nav.classList.add('scrolled');
+      } else {
+        nav.classList.remove('scrolled');
+      }
+    }
+    window.addEventListener('scroll', onScroll, { passive: true });
+    onScroll(); // cek posisi saat halaman pertama load
+  }());
+</script>
+
+</th:block>
+</body>
+</html>

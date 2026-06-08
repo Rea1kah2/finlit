@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<th:block th:fragment="footer">
+
+<footer class="site-footer">
+  <div class="footer-accent"></div>
+
+  <div class="footer-main">
+    <div class="container">
+      <div class="footer-grid">
+
+        <!-- Brand -->
+        <div>
+          <a th:href="@{/dashboard}" class="footer-brand">Fin<span>Lit</span></a>
+          <p class="footer-tagline">
+            Platform literasi dan simulasi keuangan untuk generasi yang lebih
+            cerdas secara finansial. Dirancang khusus untuk Gen Z Indonesia.
+          </p>
+        </div>
+
+        <!-- Fitur -->
+        <div>
+          <div class="footer-col-title">Fitur</div>
+          <div class="footer-links">
+            <a th:href="@{/transactions}"  class="footer-link">Transaksi</a>
+            <a th:href="@{/saving-goals}"  class="footer-link">Target Tabungan</a>
+            <a th:href="@{/reports}"       class="footer-link">Laporan Keuangan</a>
+          </div>
+        </div>
+
+        <!-- Edukasi -->
+        <div>
+          <div class="footer-col-title">Edukasi</div>
+          <div class="footer-links">
+            <a th:href="@{/articles}" class="footer-link">Artikel</a>
+            <a th:href="@{/quiz}"     class="footer-link">Kuis Literasi</a>
+          </div>
+        </div>
+
+        <!-- Akun -->
+        <div>
+          <div class="footer-col-title">Akun</div>
+          <div class="footer-links">
+            <a th:href="@{/profile}"     class="footer-link">Profil Saya</a>
+            <a th:href="@{/auth/logout}" class="footer-link">Keluar</a>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <div class="footer-bottom">
+    <div class="container">
+      <div class="footer-bottom-row">
+        <span class="footer-copy">
+          © 2026 FinLit. Seluruh hak cipta dilindungi.
+        </span>
+        <span class="footer-note">
+          Dibuat untuk Generasi Z Indonesia
+        </span>
+      </div>
+    </div>
+  </div>
+</footer>
+
+</th:block>
+</body>
+</html>

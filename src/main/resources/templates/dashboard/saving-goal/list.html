@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Target Tabungan - FinLit</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="icon" type="image/png" th:href="@{/favicon.jpg}">
+</head>
+<body class="bg-light">
+<nav class="navbar navbar-dark bg-success">
+    <div class="container">
+        <a class="navbar-brand" th:href="@{/dashboard}">FinLit</a>
+        <a th:href="@{/auth/logout}" class="btn btn-outline-light btn-sm">Logout</a>
+    </div>
+</nav>
+
+<div class="container mt-4">
+    <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+
+    <div class="d-flex justify-content-between mb-3">
+        <h5>Target Tabungan</h5>
+        <a th:href="@{/saving-goals/add}" class="btn btn-success">+ Tambah Target</a>
+    </div>
+
+    <div th:if="${goals.empty}" class="text-center text-muted py-5">
+        <p class="fs-1"></p>
+        <p>Belum ada target tabungan. Yuk buat target pertamamu!</p>
+        <a th:href="@{/saving-goals/add}" class="btn btn-success">Buat Target</a>
+    </div>
+
+    <div class="row g-3">
+        <div class="col-md-6" th:each="goal : ${goals}">
+            <div class="card shadow-sm h-100">
+                <div class="card-header d-flex justify-content-between align-items-center"
+                     th:classappend="${goal.achieved} ? 'bg-success text-white' : ''">
+                    <strong th:text="${goal.name}"></strong>
+                    <span th:if="${goal.achieved}" class="badge bg-light text-success">✅ Tercapai!</span>
+                </div>
+                <div class="card-body">
+                    <!-- Progress Bar -->
+                    <div class="mb-2 d-flex justify-content-between">
+                        <small th:text="'Terkumpul: Rp ' + ${#numbers.formatDecimal(goal.currentAmount, 1, 'COMMA', 0, 'POINT')}"></small>
+                        <small th:text="'Target: Rp ' + ${#numbers.formatDecimal(goal.targetAmount, 1, 'COMMA', 0, 'POINT')}"></small>
+                    </div>
+                    <div class="progress mb-3" style="height: 20px;">
+                        <div class="progress-bar bg-success" role="progressbar"
+                             th:style="'width: ' + ${goal.progressPercent()} + '%'"
+                             th:text="${goal.progressPercent()} + '%'">
+                        </div>
+                    </div>
+
+                    <p class="text-muted mb-2">
+                        Deadline: <strong th:text="${goal.deadline}"></strong>
+                    </p>
+
+                    <!-- Rekomendasi Strategi Setoran -->
+                    <div class="bg-light rounded p-2 mb-3">
+                        <small class="text-muted d-block mb-1">Rekomendasi setoran/bulan:</small>
+                        <div th:with="setoran=${setoranMap[goal.id]}">
+                            <div class="d-flex justify-content-between">
+                                <small>Setoran Tetap</small>
+                                <small th:text="'Rp ' + ${#numbers.formatDecimal(setoran['fixed'], 1, 'COMMA', 0, 'POINT')}"></small>
+                            </div>
+                            <div class="d-flex justify-content-between">
+                                <small>20% Pemasukan</small>
+                                <small th:text="'Rp ' + ${#numbers.formatDecimal(setoran['percentage'], 1, 'COMMA', 0, 'POINT')}"></small>
+                            </div>
+                            <div class="d-flex justify-content-between">
+                                <small>Bertahap</small>
+                                <small th:text="'Rp ' + ${#numbers.formatDecimal(setoran['accelerated'], 1, 'COMMA', 0, 'POINT')}"></small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <form th:action="@{/saving-goals/delete/{id}(id=${goal.id})}" method="post"
+                          onsubmit="return confirm('Hapus target ini?')">
+                        <button class="btn btn-sm btn-outline-danger w-100">🗑️ Hapus Target</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+  <div th:replace="~{fragments/footer :: footer}"></div>
+</body>
+</html>

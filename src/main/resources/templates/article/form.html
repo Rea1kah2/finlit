@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tulis Artikel — FinLit</title>
+  <link rel="stylesheet" th:href="@{/css/finlit.css}">
+  <link rel="icon" type="image/png" th:href="@{/favicon.jpg}">
+</head>
+<body>
+<div th:replace="~{fragments/navbar :: navbar}"></div>
+<div class="container page-content">
+  <div style="max-width:48rem; margin:0 auto;">
+    <div class="page-header">
+      <a th:href="@{/articles}" class="btn btn-ghost btn-sm" style="margin-bottom:1rem;">Kembali</a>
+      <h2>Tulis Artikel Baru</h2>
+    </div>
+    <div class="card">
+      <div class="card-body">
+        <form th:action="@{/articles/create}" th:object="${articleDto}" method="post">
+          <div class="form-group">
+            <label class="form-label">Judul Artikel</label>
+            <input type="text" th:field="*{title}" class="form-control"
+                   th:classappend="${#fields.hasErrors('title')} ? 'is-invalid'"
+                   placeholder="Judul yang menarik dan informatif">
+            <span class="invalid-feedback" th:errors="*{title}"></span>
+          </div>
+          <div class="grid-2">
+            <div class="form-group">
+              <label class="form-label">Kategori</label>
+              <select th:field="*{category}" class="form-control">
+                <option value="Budgeting">Budgeting</option>
+                <option value="Investasi">Investasi</option>
+                <option value="Tabungan">Tabungan</option>
+                <option value="Utang &amp; Kredit">Utang &amp; Kredit</option>
+                <option value="Asuransi">Asuransi</option>
+                <option value="Karir &amp; Penghasilan">Karir &amp; Penghasilan</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Status</label>
+              <select th:field="*{isPublished}" class="form-control">
+                <option value="true">Publikasikan sekarang</option>
+                <option value="false">Simpan sebagai draf</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Ringkasan</label>
+            <textarea th:field="*{summary}" class="form-control" rows="3"
+                      th:classappend="${#fields.hasErrors('summary')} ? 'is-invalid'"
+                      placeholder="Deskripsi singkat artikel (maks. 500 karakter)"></textarea>
+            <span class="invalid-feedback" th:errors="*{summary}"></span>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Konten Artikel</label>
+            <textarea th:field="*{content}" class="form-control" rows="16"
+                      th:classappend="${#fields.hasErrors('content')} ? 'is-invalid'"
+                      placeholder="Tulis isi artikel di sini..." style="min-height:20rem;"></textarea>
+            <span class="invalid-feedback" th:errors="*{content}"></span>
+          </div>
+          <div class="divider"></div>
+          <div class="flex gap-1">
+            <button type="submit" class="btn btn-primary" style="flex:1;">Publikasikan Artikel</button>
+            <a th:href="@{/articles}" class="btn btn-secondary">Batal</a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+  <div th:replace="~{fragments/footer :: footer}"></div>
+</body>
+</html>

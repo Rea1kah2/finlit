@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Transaksi — FinLit</title>
+  <link rel="stylesheet" th:href="@{/css/finlit.css}">
+  <link rel="icon" type="image/png" th:href="@{/favicon.jpg}">
+</head>
+<body>
+<div th:replace="~{fragments/navbar :: navbar}"></div>
+
+<!-- Hero -->
+<div class="hero" style="padding:2rem 0 0;">
+  <div class="container">
+    <div class="overline-gold mb-1">Transaksi</div>
+    <div class="flex-between" style="margin-bottom:1.5rem; align-items:flex-end;">
+      <h2 style="color:var(--text-on-dark);">Pencatatan Keuangan</h2>
+      <a th:href="@{/transactions/add}" class="btn btn-gold">Tambah Transaksi</a>
+    </div>
+    <div class="grid-3" style="margin-bottom:-1.25rem;">
+      <div class="stat-card stat-income">
+        <span class="overline">Pemasukan</span>
+        <span class="stat-value"
+              th:text="'Rp ' + ${#numbers.formatDecimal(totalIncome,1,'COMMA',0,'POINT')}"></span>
+      </div>
+      <div class="stat-card stat-expense">
+        <span class="overline">Pengeluaran</span>
+        <span class="stat-value"
+              th:text="'Rp ' + ${#numbers.formatDecimal(totalExpense,1,'COMMA',0,'POINT')}"></span>
+      </div>
+      <div class="stat-card stat-balance">
+        <span class="overline">Saldo Bersih</span>
+        <span class="stat-value"
+              th:text="'Rp ' + ${#numbers.formatDecimal(balance,1,'COMMA',0,'POINT')}"></span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="container page-content" style="padding-top:2.5rem;">
+
+  <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+
+  <!-- Filter -->
+  <div class="card mb-3">
+    <div class="card-body" style="padding:1.25rem;">
+      <form th:action="@{/transactions}" method="get"
+            style="display:flex; gap:0.75rem; flex-wrap:wrap; align-items:flex-end;">
+        <div style="flex:2; min-width:150px;">
+          <label class="form-label text-xs">Cari deskripsi</label>
+          <input type="text" name="keyword" class="form-control"
+                 th:value="${keyword}" placeholder="Ketik kata kunci...">
+        </div>
+        <div style="flex:1; min-width:120px;">
+          <label class="form-label text-xs">Jenis</label>
+          <select name="type" class="form-control">
+            <option value="">Semua</option>
+            <option value="INCOME"  th:selected="${selectedType == 'INCOME'}">Pemasukan</option>
+            <option value="EXPENSE" th:selected="${selectedType == 'EXPENSE'}">Pengeluaran</option>
+          </select>
+        </div>
+        <div style="flex:1.5; min-width:140px;">
+          <label class="form-label text-xs">Kategori</label>
+          <select name="categoryId" class="form-control">
+            <option value="">Semua kategori</option>
+            <option th:each="cat : ${categories}" th:value="${cat.id}"
+                    th:text="${cat.name}" th:selected="${cat.id == categoryId}"></option>
+          </select>
+        </div>
+        <div style="flex:1; min-width:125px;">
+          <label class="form-label text-xs">Dari</label>
+          <input type="date" name="startDate" class="form-control" th:value="${startDate}">
+        </div>
+        <div style="flex:1; min-width:125px;">
+          <label class="form-label text-xs">Sampai</label>
+          <input type="date" name="endDate" class="form-control" th:value="${endDate}">
+        </div>
+        <div style="flex-shrink:0; display:flex; gap:0.5rem;">
+          <button type="submit" class="btn btn-primary">Terapkan</button>
+          <a th:href="@{/transactions}" class="btn btn-ghost">Reset</a>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Tabel -->
+  <div class="card">
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Tanggal</th><th>Deskripsi</th><th>Kategori</th>
+            <th>Jenis</th><th style="text-align:right;">Jumlah</th>
+            <th>Catatan</th><th></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr th:if="${transactions.empty}">
+            <td colspan="7">
+              <div class="empty-state">
+                <p>Tidak ada transaksi yang sesuai filter.</p>
+                <a th:href="@{/transactions/add}" class="btn btn-primary btn-sm">
+                  Tambah transaksi baru
+                </a>
+              </div>
+            </td>
+          </tr>
+          <tr th:each="t : ${transactions}">
+            <td class="text-muted text-sm" th:text="${t.transactionDate}"></td>
+            <td class="font-bold" th:text="${t.description}"></td>
+            <td class="text-muted text-sm" th:text="${t.category.name}"></td>
+            <td>
+              <span th:if="${t.type.name() == 'INCOME'}"  class="badge badge-income">Pemasukan</span>
+              <span th:if="${t.type.name() == 'EXPENSE'}" class="badge badge-expense">Pengeluaran</span>
+            </td>
+            <td class="font-bold text-right"
+                th:text="'Rp ' + ${#numbers.formatDecimal(t.amount,1,'COMMA',0,'POINT')}"></td>
+            <td class="text-muted text-sm" th:text="${t.notes ?: '—'}"></td>
+            <td>
+              <!-- Gunakan data-* untuk trigger modal -->
+              <form th:id="'del-' + ${t.id}"
+                    th:action="@{/transactions/delete/{id}(id=${t.id})}" method="post">
+                <button type="button" class="btn btn-danger btn-sm"
+                        th:attr="data-id=${t.id}, data-desc=${t.description}"
+                        onclick="openDeleteModal(this)">
+                  Hapus
+                </button>
+              </form>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+
+<!-- Modal: Konfirmasi Hapus Transaksi -->
+<div id="deleteModal" class="modal-overlay" onclick="handleOverlayClick(event, 'deleteModal')">
+  <div class="modal-box modal-danger">
+    <div class="modal-header">
+      <h4>Hapus transaksi ini?</h4>
+      <div class="modal-subtitle" id="deleteDesc">—</div>
+    </div>
+    <div class="modal-body" style="padding-top:1rem; padding-bottom:0.75rem;">
+      <p>
+        Transaksi yang sudah dihapus <strong>tidak dapat dikembalikan.</strong>
+        Pastikan kamu sudah yakin sebelum melanjutkan.
+      </p>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-secondary"
+              onclick="closeModal('deleteModal')">
+        Batal
+      </button>
+      <button type="button" id="confirmDeleteBtn"
+              style="flex:1.5; background:#c0392b; color:white; border:none;
+                     font-weight:700; letter-spacing:0.01em;"
+              class="btn">
+        Hapus Sekarang
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+  let pendingDeleteForm = null;
+
+  function openDeleteModal(btn) {
+    pendingDeleteForm = document.getElementById('del-' + btn.dataset.id);
+    document.getElementById('deleteDesc').textContent = '"' + btn.dataset.desc + '"';
+    document.getElementById('deleteModal').classList.add('active');
+  }
+
+  document.getElementById('confirmDeleteBtn').addEventListener('click', function () {
+    if (pendingDeleteForm) pendingDeleteForm.submit();
+  });
+
+  function closeModal(id) {
+    document.getElementById(id).classList.remove('active');
+    pendingDeleteForm = null;
+  }
+
+  function handleOverlayClick(e, id) {
+    if (e.target === e.currentTarget) closeModal(id);
+  }
+</script>
+  <div th:replace="~{fragments/footer :: footer}"></div>
+</body>
+</html>

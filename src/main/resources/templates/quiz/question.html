@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kuis — FinLit</title>
+  <link rel="stylesheet" th:href="@{/css/finlit.css}">
+  <link rel="icon" type="image/png" th:href="@{/favicon.jpg}">
+</head>
+<body>
+<div th:replace="~{fragments/navbar :: navbar}"></div>
+<div class="container page-content">
+  <div style="max-width:40rem; margin:0 auto;">
+
+    <div class="flex-between mb-2">
+      <span class="text-sm text-muted"
+            th:text="'Soal ' + (${index} + 1) + ' dari ' + ${totalSoal}"></span>
+      <span class="text-sm text-muted" th:text="${progress} + '%'"></span>
+    </div>
+    <div class="progress-wrap mb-3">
+      <div class="progress-bar" th:style="'width:' + ${progress} + '%'"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-body">
+        <div class="badge badge-user mb-2" th:text="${question.category}"></div>
+        <h3 style="font-size:1.125rem; margin-bottom:1.75rem; line-height:1.6;"
+            th:text="${question.question}"></h3>
+
+        <form th:action="@{/quiz/answer}" method="post">
+          <input type="hidden" name="index" th:value="${index}">
+          <input type="hidden" name="answers" th:value="${answers}">
+
+          <button type="submit" name="answer" value="A" class="quiz-option">
+            <span class="opt-key">A</span>
+            <span th:text="${question.optionA}"></span>
+          </button>
+          <button type="submit" name="answer" value="B" class="quiz-option">
+            <span class="opt-key">B</span>
+            <span th:text="${question.optionB}"></span>
+          </button>
+          <button type="submit" name="answer" value="C" class="quiz-option">
+            <span class="opt-key">C</span>
+            <span th:text="${question.optionC}"></span>
+          </button>
+          <button type="submit" name="answer" value="D" class="quiz-option">
+            <span class="opt-key">D</span>
+            <span th:text="${question.optionD}"></span>
+          </button>
+        </form>
+      </div>
+    </div>
+
+  </div>
+</div>
+</body>
+</html>

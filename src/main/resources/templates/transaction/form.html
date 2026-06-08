@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tambah Transaksi — FinLit</title>
+  <link rel="stylesheet" th:href="@{/css/finlit.css}">
+  <link rel="icon" type="image/png" th:href="@{/favicon.jpg}">
+</head>
+<body>
+<div th:replace="~{fragments/navbar :: navbar}"></div>
+<div class="hero" style="padding:2rem 0;">
+  <div class="container">
+    <div class="overline-gold mb-1">Transaksi</div>
+    <h2 style="color:var(--text-on-dark);">Tambah Transaksi Baru</h2>
+    <p>Catat setiap pergerakan keuanganmu secara akurat.</p>
+  </div>
+</div>
+<div class="container page-content">
+  <div style="max-width:38rem; margin:0 auto;">
+    <a th:href="@{/transactions}" class="btn btn-ghost btn-sm mb-2">Kembali ke Transaksi</a>
+    <div class="card">
+      <div class="card-body">
+        <form th:action="@{/transactions/add}" th:object="${transactionDto}" method="post">
+          <div class="grid-2" style="gap:0.875rem;">
+            <div class="form-group" style="margin-bottom:0;">
+              <label class="form-label">Jenis Transaksi</label>
+              <select th:field="*{type}" class="form-control"
+                      th:classappend="${#fields.hasErrors('type')} ? 'is-invalid'">
+                <option value="">Pilih jenis</option>
+                <option value="INCOME">Pemasukan</option>
+                <option value="EXPENSE">Pengeluaran</option>
+              </select>
+              <span class="invalid-feedback" th:errors="*{type}"></span>
+            </div>
+            <div class="form-group" style="margin-bottom:0;">
+              <label class="form-label">Kategori</label>
+              <select th:field="*{categoryId}" class="form-control"
+                      th:classappend="${#fields.hasErrors('categoryId')} ? 'is-invalid'">
+                <option value="">Pilih kategori</option>
+                <option th:each="cat : ${categories}" th:value="${cat.id}"
+                        th:text="${cat.name}"></option>
+              </select>
+              <span class="invalid-feedback" th:errors="*{categoryId}"></span>
+            </div>
+          </div>
+          <div class="form-group mt-2">
+            <label class="form-label">Deskripsi</label>
+            <input type="text" th:field="*{description}" class="form-control"
+                   th:classappend="${#fields.hasErrors('description')} ? 'is-invalid'"
+                   placeholder="Contoh: Makan siang, Gaji bulan ini, Bayar kos">
+            <span class="invalid-feedback" th:errors="*{description}"></span>
+          </div>
+          <div class="grid-2" style="gap:0.875rem;">
+            <div class="form-group" style="margin-bottom:0;">
+              <label class="form-label">Jumlah (Rp)</label>
+              <input type="number" th:field="*{amount}" class="form-control"
+                     th:classappend="${#fields.hasErrors('amount')} ? 'is-invalid'"
+                     placeholder="0" min="1">
+              <span class="invalid-feedback" th:errors="*{amount}"></span>
+            </div>
+            <div class="form-group" style="margin-bottom:0;">
+              <label class="form-label">Tanggal</label>
+              <input type="date" th:field="*{transactionDate}" class="form-control"
+                     th:classappend="${#fields.hasErrors('transactionDate')} ? 'is-invalid'">
+              <span class="invalid-feedback" th:errors="*{transactionDate}"></span>
+            </div>
+          </div>
+          <div class="form-group mt-2">
+            <label class="form-label">Catatan <span class="text-muted" style="font-weight:400;">(opsional)</span></label>
+            <textarea th:field="*{notes}" class="form-control"
+                      placeholder="Tambahkan catatan jika perlu..." rows="3"></textarea>
+          </div>
+          <div class="divider"></div>
+          <div class="flex gap-1">
+            <button type="submit" class="btn btn-primary" style="flex:1;">Simpan Transaksi</button>
+            <a th:href="@{/transactions}" class="btn btn-secondary">Batal</a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+  <div th:replace="~{fragments/footer :: footer}"></div>
+</body>
+</html>

@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tambah Target — FinLit</title>
+  <link rel="stylesheet" th:href="@{/css/finlit.css}">
+  <link rel="icon" type="image/png" th:href="@{/favicon.jpg}">
+</head>
+<body>
+
+<div th:replace="~{fragments/navbar :: navbar}"></div>
+
+<div class="container page-content">
+  <div style="max-width:36rem; margin:0 auto;">
+
+    <div class="page-header">
+      <a th:href="@{/saving-goals}" class="btn btn-ghost btn-sm" style="margin-bottom:1rem;">
+        Kembali ke Target Tabungan
+      </a>
+      <h2>Buat Target Tabungan</h2>
+      <p>Tetapkan tujuan keuangan dan pilih strategi menabung.</p>
+    </div>
+
+    <div class="card">
+      <div class="card-body">
+        <form th:action="@{/saving-goals/add}" th:object="${savingGoalDto}" method="post">
+
+          <div class="form-group">
+            <label class="form-label">Nama Target</label>
+            <input type="text" th:field="*{name}" class="form-control"
+                   th:classappend="${#fields.hasErrors('name')} ? 'is-invalid'"
+                   placeholder="Contoh: Beli laptop, Liburan Bali, Dana darurat">
+            <span class="invalid-feedback" th:errors="*{name}"></span>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Target Jumlah (Rp)</label>
+            <input type="number" th:field="*{targetAmount}" class="form-control"
+                   th:classappend="${#fields.hasErrors('targetAmount')} ? 'is-invalid'"
+                   placeholder="0">
+            <span class="invalid-feedback" th:errors="*{targetAmount}"></span>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Sudah Terkumpul (Rp)</label>
+            <input type="number" th:field="*{currentAmount}" class="form-control" placeholder="0">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Batas Waktu</label>
+            <input type="date" th:field="*{deadline}" class="form-control"
+                   th:classappend="${#fields.hasErrors('deadline')} ? 'is-invalid'">
+            <span class="invalid-feedback" th:errors="*{deadline}"></span>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Strategi Menabung</label>
+            <select th:field="*{strategyType}" class="form-control">
+              <option value="FIXED">Setoran Tetap per Bulan</option>
+              <option value="PERCENTAGE">20% dari Estimasi Pemasukan</option>
+              <option value="ACCELERATED">Setoran Bertahap, naik 10% per bulan</option>
+            </select>
+          </div>
+
+          <div class="divider"></div>
+          <div class="flex gap-1">
+            <button type="submit" class="btn btn-primary" style="flex:1;">Simpan Target</button>
+            <a th:href="@{/saving-goals}" class="btn btn-secondary">Batal</a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+  <div th:replace="~{fragments/footer :: footer}"></div>
+</body>
+</html>

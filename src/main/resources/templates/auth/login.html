@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Masuk — FinLit</title>
+  <link rel="stylesheet" th:href="@{/css/finlit.css}">
+</head>
+<body>
+<div class="auth-wrap">
+
+  <!-- Panel Kiri Gelap -->
+  <div class="auth-left">
+    <div style="position:relative; z-index:1;">
+      <div class="auth-brand-big">Fin<span>Lit</span></div>
+      <p class="auth-tagline">
+        Platform literasi dan simulasi keuangan untuk generasi yang lebih cerdas secara finansial.
+      </p>
+    </div>
+    <div style="position:relative; z-index:1;">
+      <div style="display:flex; flex-direction:column; gap:1.25rem;">
+        <div style="padding:1.25rem; background:rgba(255,255,255,0.05);
+                    border:1px solid rgba(255,255,255,0.08); border-radius:0.75rem;">
+          <div style="font-family:'Fraunces',serif; font-size:1.5rem; font-weight:700;
+                      color:#E8F5EC; margin-bottom:0.25rem;">Catat Transaksi</div>
+          <div style="font-size:0.8125rem; color:rgba(255,255,255,0.4);">
+            Lacak setiap rupiah yang masuk dan keluar
+          </div>
+        </div>
+        <div style="padding:1.25rem; background:rgba(255,255,255,0.05);
+                    border:1px solid rgba(255,255,255,0.08); border-radius:0.75rem;">
+          <div style="font-family:'Fraunces',serif; font-size:1.5rem; font-weight:700;
+                      color:#FDF4E1; margin-bottom:0.25rem;">Simulasi Target</div>
+          <div style="font-size:0.8125rem; color:rgba(255,255,255,0.4);">
+            Strategi menabung yang personal dan terukur
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Panel Kanan: Form -->
+  <div class="auth-right">
+    <div class="auth-form-wrap">
+      <h2 style="margin-bottom:0.5rem;">Selamat datang kembali</h2>
+      <p style="margin-bottom:2rem; color:var(--text-muted);">
+        Masuk ke akun FinLit kamu
+      </p>
+
+      <div th:if="${param.error}" class="alert alert-danger">
+        Email atau kata sandi tidak sesuai. Periksa kembali.
+      </div>
+      <div th:if="${param.logout}" class="alert alert-success">
+        Kamu telah berhasil keluar dari akun.
+      </div>
+
+      <form th:action="@{/auth/login}" method="post">
+        <div class="form-group">
+          <label class="form-label">Alamat Email</label>
+          <input type="email" name="username" class="form-control"
+                 placeholder="nama@email.com" required autofocus>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Kata Sandi</label>
+          <input type="password" name="password" class="form-control"
+                 placeholder="Masukkan kata sandi" required>
+        </div>
+        <button type="submit" class="btn btn-primary btn-full btn-lg" style="margin-top:0.75rem;">
+          Masuk ke Akun
+        </button>
+      </form>
+
+      <div class="auth-footer-link">
+        Belum punya akun?
+        <a th:href="@{/auth/register}">Daftar gratis</a>
+      </div>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

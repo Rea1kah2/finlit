@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hasil Kuis — FinLit</title>
+  <link rel="stylesheet" th:href="@{/css/finlit.css}">
+  <link rel="icon" type="image/png" th:href="@{/favicon.jpg}">
+</head>
+<body>
+<div th:replace="~{fragments/navbar :: navbar}"></div>
+<div class="hero" style="padding:3rem 0;">
+  <div class="container" style="text-align:center;">
+    <div class="overline-gold mb-1">Hasil Kuis</div>
+    <div style="font-family:'Fraunces',serif; font-size:5rem; font-weight:900;
+                color:var(--gold); line-height:1; margin-bottom:0.5rem;"
+         th:text="${score} + '/' + ${totalSoal}"></div>
+    <h2 style="color:var(--text-on-dark); margin-bottom:1rem;" th:text="${grade}"></h2>
+    <div style="max-width:18rem; margin:0 auto 1.5rem;">
+      <div class="progress-wrap" style="height:8px;">
+        <div class="progress-bar" th:style="'width:' + ${percentage} + '%'"></div>
+      </div>
+      <div style="color:var(--text-on-dark-sub); font-size:0.875rem; margin-top:0.5rem;"
+           th:text="${percentage} + '% jawaban benar'"></div>
+    </div>
+    <div style="display:flex; gap:0.875rem; justify-content:center;">
+      <a th:href="@{/quiz/play}" class="btn btn-gold">Ulangi Kuis</a>
+      <a th:href="@{/dashboard}" class="btn btn-outline-dark">Kembali</a>
+    </div>
+  </div>
+</div>
+<div class="container page-content">
+  <div style="max-width:44rem; margin:0 auto;">
+    <div class="section-title">Review Jawaban</div>
+    <div th:each="item, stat : ${reviewList}" class="card mb-2"
+         style="border-left:3px solid transparent;"
+         th:style="${item['isCorrect']} ? 'border-left:3px solid var(--sage)' : 'border-left:3px solid var(--red)'">
+      <div class="card-body" style="padding:1.375rem 1.5rem;">
+        <div class="flex-between mb-1">
+          <span class="overline" th:text="'Soal ' + ${stat.count}"></span>
+          <span th:if="${item['isCorrect']}"
+                style="font-size:0.75rem; font-weight:700; color:var(--sage);">Benar</span>
+          <span th:unless="${item['isCorrect']}"
+                style="font-size:0.75rem; font-weight:700; color:var(--red);">Salah</span>
+        </div>
+        <p style="font-weight:600; margin-bottom:0.75rem; color:var(--text-dark);"
+           th:text="${item['question']}"></p>
+        <div class="text-sm mb-1">
+          Jawabanmu: <strong th:text="${item['userAnswer']}"></strong>
+          <span th:unless="${item['isCorrect']}" style="color:var(--sage); margin-left:0.75rem;">
+            Jawaban benar: <strong th:text="${item['correctAnswer']}"></strong>
+          </span>
+        </div>
+        <p class="text-sm text-muted" style="margin:0; font-style:italic;"
+           th:text="${item['explanation']}"></p>
+      </div>
+    </div>
+  </div>
+</div>
+  <div th:replace="~{fragments/footer :: footer}"></div>
+</body>
+</html>

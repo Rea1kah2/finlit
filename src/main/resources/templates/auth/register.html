@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Daftar — FinLit</title>
+  <link rel="stylesheet" th:href="@{/css/finlit.css}">
+</head>
+<body>
+<div class="auth-wrap">
+
+  <div class="auth-left">
+    <div style="position:relative; z-index:1;">
+      <div class="auth-brand-big">Fin<span>Lit</span></div>
+      <p class="auth-tagline">
+        Mulai perjalanan keuanganmu. Gratis, terstruktur, dan dirancang untuk generasimu.
+      </p>
+    </div>
+    <div style="position:relative; z-index:1;">
+      <div style="font-size:0.875rem; color:rgba(255,255,255,0.35); line-height:1.7;">
+        Bergabunglah dan mulai kelola keuanganmu dengan lebih bijak, sadar, dan terencana.
+      </div>
+    </div>
+  </div>
+
+  <div class="auth-right">
+    <div class="auth-form-wrap" style="max-width:28rem;">
+      <h2 style="margin-bottom:0.5rem;">Buat akun baru</h2>
+      <p style="margin-bottom:2rem; color:var(--text-muted);">Isi data diri untuk memulai</p>
+
+      <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
+
+      <form th:action="@{/auth/register}" th:object="${registerDto}" method="post">
+        <div class="form-group">
+          <label class="form-label">Nama Lengkap</label>
+          <input type="text" th:field="*{nama}" class="form-control"
+                 th:classappend="${#fields.hasErrors('nama')} ? 'is-invalid'"
+                 placeholder="Nama lengkap kamu">
+          <span class="invalid-feedback" th:errors="*{nama}"></span>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Alamat Email</label>
+          <input type="email" th:field="*{email}" class="form-control"
+                 th:classappend="${#fields.hasErrors('email')} ? 'is-invalid'"
+                 placeholder="nama@email.com">
+          <span class="invalid-feedback" th:errors="*{email}"></span>
+        </div>
+        <div class="grid-2" style="gap:0.875rem;">
+          <div class="form-group" style="margin-bottom:0;">
+            <label class="form-label">Kata Sandi</label>
+            <input type="password" th:field="*{password}" class="form-control"
+                   th:classappend="${#fields.hasErrors('password')} ? 'is-invalid'"
+                   placeholder="Min. 6 karakter">
+            <span class="invalid-feedback" th:errors="*{password}"></span>
+          </div>
+          <div class="form-group" style="margin-bottom:0;">
+            <label class="form-label">Konfirmasi</label>
+            <input type="password" th:field="*{confirmPassword}" class="form-control"
+                   placeholder="Ulangi kata sandi">
+          </div>
+        </div>
+        <button type="submit" class="btn btn-primary btn-full btn-lg" style="margin-top:1.5rem;">
+          Buat Akun Sekarang
+        </button>
+      </form>
+
+      <div class="auth-footer-link">
+        Sudah punya akun? <a th:href="@{/auth/login}">Masuk di sini</a>
+      </div>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

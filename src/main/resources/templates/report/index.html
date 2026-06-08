@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Laporan — FinLit</title>
+  <link rel="stylesheet" th:href="@{/css/finlit.css}">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+<body>
+<div th:replace="~{fragments/navbar :: navbar}"></div>
+<div class="container page-content">
+
+  <div class="flex-between mb-3">
+    <div class="page-header" style="margin-bottom:0;">
+      <h2>Laporan Keuangan</h2>
+      <p>Analisis pola keuanganmu secara visual.</p>
+    </div>
+    <a th:href="@{/reports/export/pdf(month=${selectedMonth},year=${selectedYear})}"
+       class="btn btn-secondary">Unduh PDF</a>
+  </div>
+
+  <form th:action="@{/reports}" method="get"
+        style="display:flex; gap:0.75rem; align-items:flex-end; margin-bottom:1.75rem;">
+    <div>
+      <label class="form-label text-xs">Bulan</label>
+      <select name="month" class="form-control" style="width:auto;">
+        <option value="1"  th:selected="${1  == selectedMonth}">Januari</option>
+        <option value="2"  th:selected="${2  == selectedMonth}">Februari</option>
+        <option value="3"  th:selected="${3  == selectedMonth}">Maret</option>
+        <option value="4"  th:selected="${4  == selectedMonth}">April</option>
+        <option value="5"  th:selected="${5  == selectedMonth}">Mei</option>
+        <option value="6"  th:selected="${6  == selectedMonth}">Juni</option>
+        <option value="7"  th:selected="${7  == selectedMonth}">Juli</option>
+        <option value="8"  th:selected="${8  == selectedMonth}">Agustus</option>
+        <option value="9"  th:selected="${9  == selectedMonth}">September</option>
+        <option value="10" th:selected="${10 == selectedMonth}">Oktober</option>
+        <option value="11" th:selected="${11 == selectedMonth}">November</option>
+        <option value="12" th:selected="${12 == selectedMonth}">Desember</option>
+      </select>
+    </div>
+    <div>
+      <label class="form-label text-xs">Tahun</label>
+      <select name="year" class="form-control" style="width:auto;">
+        <option th:each="y : ${years}" th:value="${y}" th:text="${y}"
+                th:selected="${y == selectedYear}"></option>
+      </select>
+    </div>
+    <button type="submit" class="btn btn-primary">Tampilkan</button>
+  </form>
+
+  <div class="grid-3 mb-3">
+    <div class="stat-card income">
+      <div class="stat-label">Pemasukan Bulan Ini</div>
+      <div class="stat-value"
+           th:text="'Rp ' + ${#numbers.formatDecimal(totalIncome,1,'COMMA',0,'POINT')}"></div>
+    </div>
+    <div class="stat-card expense">
+      <div class="stat-label">Pengeluaran Bulan Ini</div>
+      <div class="stat-value"
+           th:text="'Rp ' + ${#numbers.formatDecimal(totalExpense,1,'COMMA',0,'POINT')}"></div>
+    </div>
+    <div class="stat-card balance">
+      <div class="stat-label">Saldo Bulan Ini</div>
+      <div class="stat-value"
+           th:text="'Rp ' + ${#numbers.formatDecimal(balance,1,'COMMA',0,'POINT')}"></div>
+    </div>
+  </div>
+
+  <div class="charts-row">
+    <div class="chart-col-main">
+      <div class="card">
+        <div class="card-body">
+          <h5 style="margin-bottom:1.25rem;">Pemasukan vs Pengeluaran — 6 Bulan</h5>
+          <canvas id="barChart"></canvas>
+        </div>
+      </div>
+    </div>
+    <div class="chart-col-side">
+      <div class="card">
+        <div class="card-body">
+          <h5 style="margin-bottom:1.25rem;">Pengeluaran per Kategori</h5>
+          <div th:if="${!hasPieData}" class="empty-state" style="padding:2rem 1rem;">
+            <p style="font-size:0.875rem;">Belum ada pengeluaran bulan ini.</p>
+          </div>
+          <canvas th:if="${hasPieData}" id="pieChart"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-title">Detail Transaksi</div>
+  <div class="card">
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Tanggal</th><th>Deskripsi</th>
+            <th>Kategori</th><th>Jenis</th>
+            <th style="text-align:right;">Jumlah</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr th:if="${transactions.empty}">
+            <td colspan="5"><div class="empty-state"><p>Tidak ada transaksi bulan ini.</p></div></td>
+          </tr>
+          <tr th:each="t : ${transactions}">
+            <td class="text-muted text-sm" th:text="${t.transactionDate}"></td>
+            <td class="font-semibold" th:text="${t.description}"></td>
+            <td class="text-muted text-sm" th:text="${t.category.name}"></td>
+            <td>
+              <span th:if="${t.type.name() == 'INCOME'}" class="badge badge-income">Pemasukan</span>
+              <span th:if="${t.type.name() == 'EXPENSE'}" class="badge badge-expense">Pengeluaran</span>
+            </td>
+            <td style="text-align:right; font-weight:700;"
+                th:text="'Rp ' + ${#numbers.formatDecimal(t.amount,1,'COMMA',0,'POINT')}"></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+
+<div th:attr="data-pie-labels=${pieLabels}, data-pie-data=${pieData},
+              data-bar-labels=${barLabels}, data-bar-income=${barIncome},
+              data-bar-expense=${barExpense}, data-has-pie=${hasPieData}"
+     id="chartData"></div>
+
+<script>
+const d = document.getElementById('chartData');
+const hasPie = d.getAttribute('data-has-pie') === 'true';
+const colors = ['#448050','#6ea274','#9ec4a2','#c8ddca','#3a6d41','#2a5333','#1e3823','#9ec4a2'];
+
+if (hasPie && document.getElementById('pieChart')) {
+  new Chart(document.getElementById('pieChart'), {
+    type: 'doughnut',
+    data: {
+      labels: JSON.parse(d.getAttribute('data-pie-labels')),
+      datasets: [{ data: JSON.parse(d.getAttribute('data-pie-data')), backgroundColor: colors, borderWidth: 0 }]
+    },
+    options: { plugins: { legend: { position: 'bottom', labels: { font: { family: 'Plus Jakarta Sans', size: 12 } } } }, cutout: '60%' }
+  });
+}
+
+new Chart(document.getElementById('barChart'), {
+  type: 'bar',
+  data: {
+    labels: JSON.parse(d.getAttribute('data-bar-labels')),
+    datasets: [
+      { label: 'Pemasukan',   data: JSON.parse(d.getAttribute('data-bar-income')),  backgroundColor: '#c8ddca', borderRadius: 6 },
+      { label: 'Pengeluaran', data: JSON.parse(d.getAttribute('data-bar-expense')), backgroundColor: '#f5c6c6', borderRadius: 6 }
+    ]
+  },
+  options: {
+    responsive: true, plugins: { legend: { labels: { font: { family: 'Plus Jakarta Sans', size: 12 } } } },
+    scales: { y: { beginAtZero: true, grid: { color: '#f3f8f4' } }, x: { grid: { display: false } } }
+  }
+});
+</script>
+  <div th:replace="~{fragments/footer :: footer}"></div>
+</body>
+</html>

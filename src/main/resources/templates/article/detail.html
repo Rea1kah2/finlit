@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title th:text="${article.title} + ' — FinLit'">Artikel</title>
+  <link rel="stylesheet" th:href="@{/css/finlit.css}">
+    <link rel="icon" type="image/png" th:href="@{/favicon.jpg}">
+</head>
+<body>
+<div th:replace="~{fragments/navbar :: navbar}"></div>
+<div class="container page-content">
+  <div style="max-width:48rem; margin:0 auto;">
+    <a th:href="@{/articles}" class="btn btn-ghost btn-sm" style="margin-bottom:1.5rem;">
+      Kembali ke Artikel
+    </a>
+    <div class="card">
+      <div class="card-body" style="padding:2.5rem;">
+        <span class="badge badge-user mb-2" th:text="${article.category}"></span>
+        <h1 style="font-size:1.75rem; margin-bottom:1rem;" th:text="${article.title}"></h1>
+        <div style="display:flex; gap:1rem; color:var(--text-muted); font-size:0.875rem; margin-bottom:2rem;">
+          <span>Oleh <strong th:text="${article.author.nama}"></strong></span>
+          <span th:text="${#temporals.format(article.createdAt, 'dd MMMM yyyy')}"></span>
+        </div>
+        <div class="divider"></div>
+        <div style="margin-top:1.5rem; line-height:1.85; white-space:pre-wrap; color:var(--text-secondary);"
+             th:text="${article.content}"></div>
+      </div>
+    </div>
+  </div>
+</div>
+  <div th:replace="~{fragments/footer :: footer}"></div>
+</body>
+</html>
