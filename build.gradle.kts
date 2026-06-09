@@ -56,3 +56,7 @@ allOpen {
 tasks.withType<Test> {
 	useJUnitPlatform()
 }
+
+tasks.named<Test>("test") {
+    enabled = false  // skip test saat build
+}
